@@ -36,12 +36,17 @@
                 </li>
                 <li data-ng-class="{'active':vm.getClass('/servers')}">
                     <a href="/servers">
-                        <i class="fa fa-linux"></i> <span>Servers</span>
+                        <i class="fa fa-server"></i> <span>Servers</span>
                     </a>
                 </li>
                 <li data-ng-class="{'active':vm.getClass('/deployments')}">
                     <a href="/deployments">
                         <i class="fa fa-cloud-upload"></i> <span>Deployments</span>
+                    </a>
+                </li>
+                <li data-ng-class="{'active':vm.getClass('/backups')}">
+                    <a href="/backups">
+                        <i class="fa fa-archive"></i> <span>Backups</span>
                     </a>
                 </li>
             </ul>

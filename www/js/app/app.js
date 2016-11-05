@@ -67,6 +67,21 @@ app.config(['$routeProvider', '$locationProvider', 'wsProvider', 'shinyDeployCon
                 controllerAs: 'vm',
                 templateUrl: '/js/app/views/deployments_run.html'
             })
+            .when('/backups', {
+                controller: 'BackupssController',
+                controllerAs: 'vm',
+                templateUrl: '/js/app/views/backups.html'
+            })
+            .when('/backups/add', {
+                controller: 'BackupsAddController',
+                controllerAs: 'vm',
+                templateUrl: '/js/app/views/backups_form.html'
+            })
+            .when('/backups/edit/:backupId', {
+                controller: 'BackupsEditController',
+                controllerAs: 'vm',
+                templateUrl: '/js/app/views/backups_form.html'
+            })
             .otherwise({ redirectTo: '/login' });
     }
 ]);
