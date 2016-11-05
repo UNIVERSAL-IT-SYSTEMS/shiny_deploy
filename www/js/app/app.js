@@ -68,7 +68,7 @@ app.config(['$routeProvider', '$locationProvider', 'wsProvider', 'shinyDeployCon
                 templateUrl: '/js/app/views/deployments_run.html'
             })
             .when('/backups', {
-                controller: 'BackupssController',
+                controller: 'BackupsController',
                 controllerAs: 'vm',
                 templateUrl: '/js/app/views/backups.html'
             })
