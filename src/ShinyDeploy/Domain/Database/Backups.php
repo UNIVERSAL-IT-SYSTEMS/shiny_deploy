@@ -59,4 +59,25 @@ class Backups extends DatabaseDomain
         $rows = $this->db->prepare("SELECT * FROM backups ORDER BY `name`")->getResult(false);
         return $rows;
     }
+
+    /**
+     * Stores new backup in database.
+     *
+     * @param array $backupData
+     * @return bool
+     */
+    public function addBackup(array $backupData)
+    {
+        return $this->db->prepare(
+            "INSERT INTO backups
+              (`name`, `source_server_id`, `source_server_path`, `target_server_id`, `target_server_path`)
+              VALUES
+                (%s, %d, %s, %d, %s)",
+            $backupData['name'],
+            $backupData['source_server_id'],
+            $backupData['source_server_path'],
+            $backupData['target_server_id'],
+            $backupData['target_server_path']
+        )->execute();
+    }
 }

@@ -1,0 +1,106 @@
+<section class="content-header">
+    <h1>
+        Backups
+        <small data-ng-if="vm.isAdd">Add new backup</small>
+        <small data-ng-if="vm.isEdit">Edit backup</small>
+    </h1>
+</section>
+
+<section class="content">
+    <div data-ng-include="'/js/app/partials/alerts.html'"></div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <form name="editBackupForm" novalidate>
+                <input type="hidden" name="id" data-ng-model="vm.backup.id" data-ng-if="vm.isEdit">
+                <div class="box" data-ng-class="{'box-primary': vm.isEdit, 'box-success': vm.isAdd}">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-12 col-md-12">
+                                <div class="form-group"
+                                     data-ng-class="{ 'has-error': editBackupForm.name.$invalid && editBackupForm.name.$dirty}">
+                                    <label for="backup-name">Name</label>
+                                    <input name="name"
+                                           type="text"
+                                           class="form-control"
+                                           id="backup-name"
+                                           placeholder="My backup"
+                                           data-ng-model="vm.backup.name"
+                                           data-ng-minlength="3"
+                                           data-ng-maxlength="100"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6">
+                                <div class="form-group"
+                                     data-ng-class="{ 'has-error': editBackupForm.source_server_id.$invalid && editBackupForm.source_server_id.$dirty}">
+                                    <label for="source-server-id">Source Server</label>
+                                    <select name="source_server_id"
+                                            id="source-server-id"
+                                            class="form-control"
+                                            data-ng-model="vm.backup.source_server_id"
+                                            ng-options="server.id as server.name for server in vm.servers"
+                                            required>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6">
+                                <div class="form-group"
+                                     data-ng-class="{ 'has-error': editBackupForm.source_server_path.$invalid && editBackupForm.source_server_path.$dirty}">
+                                    <label for="source-server-path">Source path</label>
+                                    <input name="source_server_path"
+                                           type="text"
+                                           class="form-control"
+                                           id="source-server-path"
+                                           placeholder="/"
+                                           data-ng-model="vm.backup.source_server_path"
+                                           data-ng-minlength="1"
+                                           data-ng-maxlength="200"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="col-xs-12 col-md-6">
+                                <div class="form-group"
+                                     data-ng-class="{ 'has-error': editBackupForm.target_server_id.$invalid && editBackupForm.target_server_id.$dirty}">
+                                    <label for="target-server-id">Target Server</label>
+                                    <select name="target_server_id"
+                                            id="target-server-id"
+                                            class="form-control"
+                                            data-ng-model="vm.backup.target_server_id"
+                                            ng-options="server.id as server.name for server in vm.servers"
+                                            required>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-md-6">
+                                <div class="form-group"
+                                     data-ng-class="{ 'has-error': editBackupForm.target_server_path.$invalid && editBackupForm.target_server_path.$dirty}">
+                                    <label for="target-server-path">Target path</label>
+                                    <input name="target_server_path"
+                                           type="text"
+                                           class="form-control"
+                                           id="target-server-path"
+                                           placeholder="/"
+                                           data-ng-model="vm.backup.target_server_path"
+                                           data-ng-minlength="1"
+                                           data-ng-maxlength="200"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box box-solid">
+                    <div class="box-body">
+                        <button data-ng-if="vm.isAdd" data-ng-disabled="editBackupForm.$invalid" data-ng-click="vm.addBackup()" class="btn btn-success">Save</button>
+                        <button data-ng-if="vm.isEdit" data-ng-disabled="editBackupForm.$invalid" data-ng-click="vm.updateBackup()" class="btn btn-primary">Update</button>
+                        <a href="/backups" class="btn btn-default">Cancel</a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</section>
