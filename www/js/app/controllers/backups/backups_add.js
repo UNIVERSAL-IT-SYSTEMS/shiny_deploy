@@ -38,7 +38,6 @@
          * Requests add-backup action on project backend.
          */
         function addBackup() {
-            console.log(vm.backup);
             backupsService.addBackup(vm.backup).then(function() {
                 $location.path('/backups');
                 alertsService.queueAlert('Backup successfully added.', 'success');

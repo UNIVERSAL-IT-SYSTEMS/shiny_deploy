@@ -36,6 +36,19 @@ app.service('backupsService', ['ws', '$q', function (ws, $q) {
     };
 
     /**
+     * Removes a backup from database.
+     *
+     * @param {number} backupId
+     * @returns {promise}
+     */
+    this.deleteBackup = function (backupId) {
+        var requestParams = {
+            backupId: backupId
+        };
+        return ws.sendDataRequest('deleteBackup', requestParams);
+    };
+
+    /**
      * Fetches data for a backup.
      *
      * @param {number} backupId

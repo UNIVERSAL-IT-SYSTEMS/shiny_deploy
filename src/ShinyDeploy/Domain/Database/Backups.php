@@ -128,4 +128,21 @@ class Backups extends DatabaseDomain
         }
         return $backupData;
     }
+
+    /**
+     * Deletes a backup.
+     *
+     * @param int $backupId
+     * @return bool
+     */
+    public function deleteBackup($backupId)
+    {
+        $backupId = (int)$backupId;
+        if ($backupId === 0) {
+            return false;
+        }
+
+        // delete backup:
+        return $this->db->prepare("DELETE FROM backups WHERE `id` = %d LIMIT 1", $backupId)->execute();
+    }
 }
