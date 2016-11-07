@@ -80,4 +80,52 @@ class Backups extends DatabaseDomain
             $backupData['target_server_path']
         )->execute();
     }
+
+    /**
+     * Updates backup.
+     *
+     * @param array $backupData
+     * @return bool
+     */
+    public function updateBackup(array $backupData)
+    {
+        if (!isset($backupData['id'])) {
+            return false;
+        }
+        return $this->db->prepare(
+            "UPDATE backups
+            SET `name` = %s,
+              `source_server_id` = %d,
+              `source_server_path` = %s,
+              `target_server_id` = %d,
+              `target_server_path` = %s
+            WHERE id = %d",
+            $backupData['name'],
+            $backupData['source_server_id'],
+            $backupData['source_server_path'],
+            $backupData['target_server_id'],
+            $backupData['target_server_path'],
+            $backupData['id']
+        )->execute();
+    }
+
+    /**
+     * Fetches backup data.
+     *
+     * @param int $backupId
+     * @return array
+     */
+    public function getBackupData($backupId)
+    {
+        $backupId = (int)$backupId;
+        if ($backupId === 0) {
+            return [];
+        }
+        $backupData = $this->db->prepare("SELECT * FROM backups WHERE `id` = %d", $backupId)
+            ->getResult(true);
+        if (empty($backupData)) {
+            return [];
+        }
+        return $backupData;
+    }
 }

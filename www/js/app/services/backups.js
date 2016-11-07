@@ -23,6 +23,42 @@ app.service('backupsService', ['ws', '$q', function (ws, $q) {
     };
 
     /**
+     * Updates existing backup.
+     *
+     * @param {Array} backupData
+     * @returns {promise}
+     */
+    this.updateBackup = function (backupData) {
+        var requestParams = {
+            backupData: backupData
+        };
+        return ws.sendDataRequest('updateBackup', requestParams);
+    };
+
+    /**
+     * Fetches data for a backup.
+     *
+     * @param {number} backupId
+     * @returns {bool|promise}
+     */
+    this.getBackupData = function(backupId) {
+        if (backupId === 0) {
+            return false;
+        }
+
+        var deferred = $q.defer();
+        var requestParams = {
+            backupId: backupId
+        };
+
+        ws.sendDataRequest('getBackupData', requestParams).then(function(data) {
+            deferred.resolve(data);
+        });
+
+        return deferred.promise;
+    };
+
+    /**
      * Fetches list of servers.
      *
      * @returns {promise}

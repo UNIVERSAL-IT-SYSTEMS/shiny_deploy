@@ -40,6 +40,7 @@
                                             class="form-control"
                                             data-ng-model="vm.backup.source_server_id"
                                             ng-options="server.id as server.name for server in vm.servers"
+                                            convert-to-number
                                             required>
                                     </select>
                                 </div>
@@ -69,6 +70,7 @@
                                             class="form-control"
                                             data-ng-model="vm.backup.target_server_id"
                                             ng-options="server.id as server.name for server in vm.servers"
+                                            convert-to-number
                                             required>
                                     </select>
                                 </div>
