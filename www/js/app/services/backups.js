@@ -79,4 +79,27 @@ app.service('backupsService', ['ws', '$q', function (ws, $q) {
     this.getServers = function() {
         return ws.sendDataRequest('getServers');
     };
+
+    this.getServersList = function () {
+        var deferred = $q.defer();
+        ws.sendDataRequest('getServers').then(function(data) {
+            var servers = {};
+            angular.forEach(data, function(server, key) {
+                servers[server.id] = server;
+            });
+            deferred.resolve(servers);
+        });
+
+        return deferred.promise;
+    };
+
+    /**
+     * Triggers a gearman job through websocket server.
+     *
+     * @param {string} jobName
+     * @param {object} jobPayload
+     */
+    this.triggerJob = function(jobName, jobPayload) {
+        ws.sendTriggerRequest(jobName, jobPayload);
+    };
 }]);

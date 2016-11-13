@@ -82,6 +82,11 @@ app.config(['$routeProvider', '$locationProvider', 'wsProvider', 'shinyDeployCon
                 controllerAs: 'vm',
                 templateUrl: '/js/app/views/backups_form.html'
             })
+            .when('/backups/dashboard/:backupId', {
+                controller: 'BackupsDashboardController',
+                controllerAs: 'vm',
+                templateUrl: '/js/app/views/backups_dashboard.html'
+            })
             .otherwise({ redirectTo: '/login' });
     }
 ]);

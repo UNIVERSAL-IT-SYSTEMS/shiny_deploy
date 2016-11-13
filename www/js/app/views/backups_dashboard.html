@@ -1,0 +1,59 @@
+<section class="content-header">
+    <h1>
+        {{vm.backup.name}}
+        <small>Run backup</small>
+    </h1>
+</section>
+
+<section class="content">
+    <div data-ng-include="'/js/app/partials/alerts.html'"></div>
+
+    <div class="row">
+        <div class="col-xs-12 col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Source</h3>
+                </div>
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Server</dt>
+                        <dd>{{ vm.servers[vm.backup.source_server_id].name }}</dd>
+
+                        <dt>Path</dt>
+                        <dd>{{ vm.backup.source_server_path }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 col-md-6">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Target</h3>
+                </div>
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Server</dt>
+                        <dd>{{ vm.servers[vm.backup.target_server_id].name }}</dd>
+
+                        <dt>Path</dt>
+                        <dd>{{ vm.backup.target_server_path }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12">
+            <div class="box box-solid">
+                <div class="box-body">
+                    <button class="btn btn-success" data-ng-click="vm.triggerBackup()"><i class="fa fa-play"></i> Run Backup</button>
+                    <a href="/backups" class="pull-right btn btn-default"><i class="fa fa-chevron-left"></i> Back</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12">
+            <div data-ng-include="'/js/app/partials/console.html'"></div>
+        </div>
+    </div>
+</section>
