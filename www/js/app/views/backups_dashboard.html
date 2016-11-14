@@ -20,7 +20,7 @@
                         <dd>{{ vm.servers[vm.backup.source_server_id].name }}</dd>
 
                         <dt>Path</dt>
-                        <dd>{{ vm.backup.source_server_path }}</dd>
+                        <dd>{{ vm.servers[vm.backup.source_server_id].root_path }}{{ vm.backup.source_server_path }}</dd>
                     </dl>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                         <dd>{{ vm.servers[vm.backup.target_server_id].name }}</dd>
 
                         <dt>Path</dt>
-                        <dd>{{ vm.backup.target_server_path }}</dd>
+                        <dd>{{ vm.servers[vm.backup.target_server_id].root_path }}{{ vm.backup.target_server_path }}</dd>
                     </dl>
                 </div>
             </div>

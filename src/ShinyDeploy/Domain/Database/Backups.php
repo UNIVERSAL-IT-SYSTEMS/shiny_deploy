@@ -68,6 +68,7 @@ class Backups extends DatabaseDomain
      */
     public function addBackup(array $backupData)
     {
+        $this->prepareDataForSave($backupData);
         return $this->db->prepare(
             "INSERT INTO backups
               (`name`, `source_server_id`, `source_server_path`, `target_server_id`, `target_server_path`)
@@ -92,6 +93,7 @@ class Backups extends DatabaseDomain
         if (!isset($backupData['id'])) {
             return false;
         }
+        $this->prepareDataForSave($backupData);
         return $this->db->prepare(
             "UPDATE backups
             SET `name` = %s,
@@ -144,5 +146,25 @@ class Backups extends DatabaseDomain
 
         // delete backup:
         return $this->db->prepare("DELETE FROM backups WHERE `id` = %d LIMIT 1", $backupId)->execute();
+    }
+
+    /**
+     * Prepares backup-data for save into database.
+     *
+     * @param array $backupData
+     */
+    protected function prepareDataForSave(array &$backupData)
+    {
+        $backupData['source_server_path'] = trim($backupData['source_server_path']);
+        $backupData['source_server_path'] = rtrim($backupData['source_server_path'], '/');
+        if (empty($backupData['source_server_path'])) {
+            $backupData['source_server_path'] = '/';
+        }
+
+        $backupData['target_server_path'] = trim($backupData['target_server_path']);
+        $backupData['target_server_path'] = rtrim($backupData['target_server_path'], '/');
+        if (empty($backupData['target_server_path'])) {
+            $backupData['target_server_path'] = '/';
+        }
     }
 }

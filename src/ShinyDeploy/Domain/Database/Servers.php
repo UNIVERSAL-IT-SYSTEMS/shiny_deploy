@@ -119,6 +119,7 @@ class Servers extends DatabaseDomain
      */
     public function addServer(array $serverData)
     {
+        $this->prepareDataForSave($serverData);
         $serverData = $this->encryptData($serverData, $this->encryptedFields);
         if ($serverData === false) {
             throw new RuntimeException('Data encryption failed.');
@@ -151,6 +152,7 @@ class Servers extends DatabaseDomain
             return false;
         }
 
+        $this->prepareDataForSave($serverData);
         $serverData = $this->encryptData($serverData, $this->encryptedFields);
         if ($serverData === false) {
             throw new RuntimeException('Data encryption failed.');
@@ -231,5 +233,19 @@ class Servers extends DatabaseDomain
         }
         $cnt = $this->db->prepare("SELECT COUNT(id) FROM deployments WHERE `server_id` = %d", $serverId)->getValue();
         return ($cnt > 0);
+    }
+
+    /**
+     * Prepares server-data for save into database.
+     *
+     * @param array $serverData
+     */
+    protected function prepareDataForSave(array &$serverData)
+    {
+        $serverData['root_path'] = trim($serverData['root_path']);
+        $serverData['root_path'] = rtrim($serverData['root_path'], '/');
+        if (empty($serverData['root_path'])) {
+            $serverData['root_path'] = '/';
+        }
     }
 }

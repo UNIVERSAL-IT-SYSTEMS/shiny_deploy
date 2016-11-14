@@ -10,7 +10,7 @@ class UpdateServer extends WsDataAction
 {
     /**
      * Updates server data in database.
-     * 
+     *
      * @param array $actionPayload
      * @return boolean
      * @throws InvalidPayloadException
