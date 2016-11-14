@@ -30,6 +30,11 @@ return [
                 'filename' => 'RepositoryActions.php',
                 'instances' => 2,
             ],
+            'backupactions' => [
+                'classname' => 'ShinyDeploy\Worker\BackupActions',
+                'filename' => 'BackupActions.php',
+                'instances' => 2,
+            ],
         ]
     ],
     'zmq' => [
