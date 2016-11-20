@@ -2,6 +2,7 @@
 
 use RuntimeException;
 use ShinyDeploy\Domain\Database\Auth;
+use ShinyDeploy\Domain\Database\Backups;
 use ShinyDeploy\Exceptions\MissingDataException;
 use ShinyDeploy\Responder\WsLogResponder;
 use ShinyDeploy\Responder\WsNotificationResponder;
@@ -37,6 +38,10 @@ class RunBackup extends WsWorkerAction
 
         // Start backup
         $logResponder->log('Starting backup...');
+
+        $backups = new Backups($this->config, $this->logger);
+        $backups->setEnryptionKey($encryptionKey);
+        $backup = $backups->getBackup($backupId);
 
         // @todo Implement actual backup methods...
         $logResponder->success('Backup successfully completed.');

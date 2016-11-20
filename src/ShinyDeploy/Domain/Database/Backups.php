@@ -1,6 +1,7 @@
 <?php
 namespace ShinyDeploy\Domain\Database;
 
+use ShinyDeploy\Domain\Backup;
 use ShinyDeploy\Traits\CryptableDomain;
 
 class Backups extends DatabaseDomain
@@ -129,6 +130,23 @@ class Backups extends DatabaseDomain
             return [];
         }
         return $backupData;
+    }
+
+    /**
+     * Creates and returns a backup object.
+     *
+     * @param int $backupId
+     * @return Backup
+     */
+    public function getBackup($backupId)
+    {
+        $data = $this->getBackupData($backupId);
+        if (empty($data)) {
+            throw new \RuntimeException('Backup not found in database.');
+        }
+        $backup = new Backup($this->config, $this->logger);
+        $backup->setEnryptionKey($this->encryptionKey);
+        return $backup;
     }
 
     /**
