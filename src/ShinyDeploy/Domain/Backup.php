@@ -20,6 +20,15 @@ class Backup extends Domain
     /** @var \ShinyDeploy\Domain\Server\Server $targetServer */
     protected $targetServer;
 
+    /** @var string $backupPath */
+    protected $sourceBackupPath = '';
+
+    /** @var string $targetBackupPath */
+    protected $targetBackupPath = '';
+
+    /** @var string $backupFilename */
+    protected $backupFilename = '';
+
     public function init(array $data)
     {
         $this->data = $data;
@@ -63,14 +72,6 @@ class Backup extends Domain
             return false;
         }
 
-        // @todo Does is work with SFTP target?
-        /*
-        if ($this->targetServer->getType() !== 'ssh') {
-            $this->logResponder->error('Target server is not of type SSH. Aborting backup.');
-            return false;
-        }
-        */
-
         // Check connectivity of source and target server:
         if ($this->sourceServer->checkConnectivity() !== true) {
             $this->logResponder->error('Could not connect to source server. Aborting backup.');
@@ -81,35 +82,28 @@ class Backup extends Domain
             return false;
         }
 
-        // Check availability of "tar" on source server:
-        $cmdResult = $this->sourceServer->executeCommand('which tar');
-        if ($cmdResult === false) {
-            $this->logResponder->error('Could not execute ssh command on source server. Aborting backup.');
-            return false;
+        // Check if required binaries exist on source server:
+        $binaries = ['tar', 'gzip', 'scp'];
+        foreach ($binaries as $binary) {
+            $checkResult = $this->sourceServer->binaryExists($binary);
+            if ($checkResult === false) {
+                $this->logResponder->error(sprintf('%s not found on source server. Aborting backup.', $binary));
+                return false;
+            }
         }
-        $cmdResult = trim($cmdResult);
-        if (empty($cmdResult) || strpos($cmdResult, 'tar') === false) {
-            $this->logResponder->error('Tar not found on source server. Aborting backup.');
-            return false;
-        }
-        $this->logResponder->log('Tar found at: ' . $cmdResult);
-
-        // Check availability of "scp" on source server:
-        $cmdResult = $this->sourceServer->executeCommand('which scp');
-        if ($cmdResult === false) {
-            $this->logResponder->error('Could not execute ssh command on source server. Aborting backup.');
-            return false;
-        }
-        $cmdResult = trim($cmdResult);
-        if (empty($cmdResult) || strpos($cmdResult, 'scp') === false) {
-            $this->logResponder->error('Scp not found on source server. Aborting backup.');
-            return false;
-        }
-        $this->logResponder->log('Scp found at: ' . $cmdResult);
 
         return true;
     }
 
+    /**
+     * Executes a backup by compressing source folder on source server and than uploading this backup file
+     * to target server.
+     *
+     * @todo Delete backup on source server after upload.
+     * @todo Add verification after upload (checksum)
+     *
+     * @return bool
+     */
     public function runBackup()
     {
         if (empty($this->data)) {
@@ -121,5 +115,110 @@ class Backup extends Domain
         if (empty($this->targetServer)) {
             throw new RuntimeException('Target server object can not be empty.');
         }
+
+        // Compress files on source server:
+        $this->logResponder->log('Compressing files on source server...');
+        $this->setPaths();
+        $compressResult = $this->compressSource();
+        if ($compressResult !== true) {
+            $this->logResponder->error('Could not compress files on source server. Aborting backup.');
+            return false;
+        }
+        $this->logResponder->info(sprintf('Files successfully compressed to: %s', $this->backupFilename));
+
+        // Upload backup to target server:
+        $this->logResponder->log('Uploading backup to target server...');
+        $uploadResult = $this->uploadBackupToTarget();
+        if ($uploadResult !== true) {
+            $this->logResponder->error('Could not upload backup to target server. Aborting backup.');
+            return false;
+        }
+        $this->logResponder->info('Backup successfully uploaded to target server.');
+
+        return true;
+    }
+
+    /**
+     * Compresses a folder on source server into a backup archive.
+     *
+     * @return bool
+     */
+    protected function compressSource()
+    {
+        $compressCommandRaw = 'cd %s && tar --exclude=%s -c . | gzip -9 > %s';
+        $compressCommand = sprintf(
+            $compressCommandRaw,
+            $this->sourceBackupPath,
+            $this->backupFilename,
+            $this->backupFilename
+        );
+        $compressResult = $this->sourceServer->executeCommand($compressCommand);
+        if ($compressResult === false) {
+            return false;
+        }
+        $checkCommand = 'file ' . $this->sourceBackupPath . '/' . $this->backupFilename;
+        $checkResult = $this->sourceServer->executeCommand($checkCommand);
+        if (empty($checkResult) || stripos($checkResult, 'no such') !== false) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Uploads a backup archive from source to target server.
+     *
+     * @todo Check for sshpass on source server
+     * @todo Check if sshpass is requried
+     * @todo Abort and show error on "hostname authetication errors"
+     *
+     * @return bool
+     */
+    protected function uploadBackupToTarget()
+    {
+        if (empty($this->backupFilename)) {
+            throw new RuntimeException('Backup filename no set. Can not move backup.');
+        }
+        $rawUploadCommand = "sshpass -p '%s' scp -P %s %s %s@%s:%s";
+        $uploadCommand = sprintf(
+            $rawUploadCommand,
+            $this->targetServer->getPassword(),
+            $this->targetServer->getPort(),
+            $this->sourceBackupPath . '/' . $this->backupFilename,
+            $this->targetServer->getUsername(),
+            $this->targetServer->getHostname(),
+            $this->targetBackupPath
+        );
+        $uploadResult = $this->sourceServer->executeCommand($uploadCommand);
+        if ($uploadResult === false) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Sets backup paths and filename for source and target server.
+     */
+    protected function setPaths()
+    {
+        // set source backup path:
+        $sourceServerRoot = $this->sourceServer->getRootPath();
+        $sourceServerRoot = trim($sourceServerRoot, '/');
+        $sourceBackupPath = trim($this->data['source_server_path'], '/');
+        $this->sourceBackupPath = '/' . $sourceServerRoot . '/' . $sourceBackupPath;
+        $this->sourceBackupPath = str_replace('//', '/', $this->sourceBackupPath);
+
+        // set target backup path:
+        $targetServerRoot = $this->targetServer->getRootPath();
+        $targetServerRoot = trim($targetServerRoot, '/');
+        $targetBackupPath = trim($this->data['target_server_path'], '/');
+        $this->targetBackupPath = '/' . $targetServerRoot . '/' . $targetBackupPath;
+        $this->targetBackupPath = str_replace('//', '/', $this->targetBackupPath);
+
+        // set backup filename:
+        $backupName = strtolower($this->data['name']);
+        $basename = preg_replace('[^a-z0-9-_.]', '', $backupName);
+        $filename = $basename . '_' . strftime('%Y-%m-%d_%H%M') . '.tar.gz';
+        $this->backupFilename = $filename;
     }
 }

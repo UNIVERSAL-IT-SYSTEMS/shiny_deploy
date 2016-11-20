@@ -30,24 +30,32 @@ class RunBackup extends WsWorkerAction
             throw new RuntimeException('Could not get encryption key.');
         }
 
-        // Init responder
+        // Init responder:
         $logResponder = new WsLogResponder($this->config, $this->logger);
         $logResponder->setClientId($this->clientId);
         $notificationResponder = new WsNotificationResponder($this->config, $this->logger);
         $notificationResponder->setClientId($this->clientId);
 
-        // Start backup
-        $logResponder->log('Starting backup...');
-
+        // Prepare backup object:
         $backups = new Backups($this->config, $this->logger);
         $backups->setEnryptionKey($encryptionKey);
         $backup = $backups->getBackup($backupId);
         $backup->setLogResponder($logResponder);
 
+        // Check prerequisites:
         $logResponder->log('Checking prerequisites...');
         $prerequisitesCheck = $backup->checkPrerequisites();
         if ($prerequisitesCheck !== true) {
             $notificationResponder->send('Prerequisites check failed. Backup aborted.', 'danger');
+            return false;
+        }
+        $logResponder->info('Prerequisites check completed without errors.');
+
+        // Run backup:
+        $logResponder->log('Starting backup...');
+        $backupResult = $backup->runBackup();
+        if ($backupResult !== true) {
+            $notificationResponder->send('Backup failed.', 'danger');
             return false;
         }
 

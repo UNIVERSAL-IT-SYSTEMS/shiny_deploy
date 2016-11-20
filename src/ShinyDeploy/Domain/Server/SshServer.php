@@ -176,4 +176,21 @@ class SshServer extends Server
             $this->data['port']
         );
     }
+
+    /**
+     * Checks if a binary/program exists on server.
+     *
+     * @param string $binary
+     * @return bool
+     */
+    public function binaryExists($binary)
+    {
+        $command = 'command -v ' . $binary;
+        $checkResult = $this->executeCommand($command);
+        if ($checkResult === false) {
+            return false;
+        }
+        $checkResult = trim($checkResult);
+        return (strpos($checkResult, $binary) !== false);
+    }
 }

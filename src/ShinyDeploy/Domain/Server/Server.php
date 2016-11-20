@@ -21,7 +21,8 @@ abstract class Server extends Domain
 
     abstract public function checkConnectivity();
 
-    public function init(array $data) {
+    public function init(array $data)
+    {
         parent::init($data);
         $this->connect(
             $this->data['hostname'],
@@ -44,5 +45,58 @@ abstract class Server extends Domain
         }
         $remotePath = trim($this->data['root_path']);
         return $remotePath;
+    }
+
+
+    /**
+     * Returns servers username.
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        if (!isset($this->data['username'])) {
+            throw new \RuntimeException('Username not set in server object.');
+        }
+        return $this->data['username'];
+    }
+
+    /**
+     * Returns servers password.
+     *
+     * @return string
+     */
+    public function getPassword()
+    {
+        if (!isset($this->data['password'])) {
+            throw new \RuntimeException('Password not set in server object.');
+        }
+        return $this->data['password'];
+    }
+
+    /**
+     * Returns servers hostname.
+     *
+     * @return string
+     */
+    public function getHostname()
+    {
+        if (!isset($this->data['hostname'])) {
+            throw new \RuntimeException('Hostname not set in server object.');
+        }
+        return $this->data['hostname'];
+    }
+
+    /**
+     * Returns servers port.
+     *
+     * @return int
+     */
+    public function getPort()
+    {
+        if (!isset($this->data['port'])) {
+            throw new \RuntimeException('Port not set in server object.');
+        }
+        return (int)$this->data['port'];
     }
 }
