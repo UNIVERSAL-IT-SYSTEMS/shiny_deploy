@@ -146,6 +146,7 @@ class Backups extends DatabaseDomain
         }
         $backup = new Backup($this->config, $this->logger);
         $backup->setEnryptionKey($this->encryptionKey);
+        $backup->init($data);
         return $backup;
     }
 

@@ -233,27 +233,24 @@ class Ssh
      * use stderr for outputs.
      *
      * @param string $cmd
-     * @param string $pty
-     * @param array $env
-     * @param int $width
-     * @param int $height
-     * @param int $width_height_type
      * @return bool|string
      */
-    public function exec(
-        $cmd,
-        $pty = null,
-        array $env = [],
-        $width = 80,
-        $height = 25,
-        $width_height_type = SSH2_TERM_UNIT_CHARS
-    ) {
-        $stdout = ssh2_exec($this->sshConnection, $cmd, $pty, $env, $width, $height, $width_height_type);
+    public function exec($cmd)
+    {
+        $stdout = ssh2_exec($this->sshConnection, $cmd);
+        if ($stdout === false) {
+            $this->setError(11);
+            return false;
+        }
         $stderr = ssh2_fetch_stream($stdout, SSH2_STREAM_STDERR);
         stream_set_blocking($stderr, true);
         stream_set_blocking($stdout, true);
         $error = stream_get_contents($stderr);
         $output = stream_get_contents($stdout);
+        if ($output === false) {
+            $this->setError(11);
+            return false;
+        }
         return $output . $error;
     }
 
@@ -265,7 +262,7 @@ class Ssh
      */
     protected function setError($errorCode)
     {
-        switch($errorCode) {
+        switch ($errorCode) {
             case 1:
                 $this->errorMsg = 'Server data not complete.';
                 return true;

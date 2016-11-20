@@ -42,9 +42,14 @@ class RunBackup extends WsWorkerAction
         $backups = new Backups($this->config, $this->logger);
         $backups->setEnryptionKey($encryptionKey);
         $backup = $backups->getBackup($backupId);
+        $backup->setLogResponder($logResponder);
 
-        // @todo Implement actual backup methods...
-        $logResponder->success('Backup successfully completed.');
+        $logResponder->log('Checking prerequisites...');
+        $prerequisitesCheck = $backup->checkPrerequisites();
+        if ($prerequisitesCheck !== true) {
+            $notificationResponder->send('Prerequisites check failed. Backup aborted.', 'danger');
+            return false;
+        }
 
         // Send success notification
         $notificationResponder->send('Backup successfully completed.', 'success');
