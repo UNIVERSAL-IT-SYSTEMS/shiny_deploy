@@ -49,7 +49,7 @@ class RunBackup extends WsWorkerAction
             $notificationResponder->send('Prerequisites check failed. Backup aborted.', 'danger');
             return false;
         }
-        $logResponder->info('Prerequisites check completed without errors.');
+        $logResponder->log('Prerequisites check completed without errors.');
 
         // Run backup:
         $logResponder->log('Starting backup...');

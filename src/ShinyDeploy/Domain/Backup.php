@@ -82,8 +82,13 @@ class Backup extends Domain
             return false;
         }
 
-        // Check if required binaries exist on source server:
+        // Collect binaries required on source-server:
         $binaries = ['tar', 'gzip', 'scp'];
+        if ($this->targetServer->usesPasswordAuth() === true) {
+            array_push($binaries, 'sshpass');
+        }
+
+        // Check if required binaries exist on source server:
         foreach ($binaries as $binary) {
             $checkResult = $this->sourceServer->binaryExists($binary);
             if ($checkResult === false) {
@@ -174,9 +179,7 @@ class Backup extends Domain
     /**
      * Uploads a backup archive from source to target server.
      *
-     * @todo Check for sshpass on source server
-     * @todo Check if sshpass is requried
-     * @todo Abort and show error on "hostname authetication errors"
+     * @todo Abort and show error on "hostname authentication errors"
      *
      * @return bool
      */
@@ -185,10 +188,14 @@ class Backup extends Domain
         if (empty($this->backupFilename)) {
             throw new RuntimeException('Backup filename no set. Can not move backup.');
         }
-        $rawUploadCommand = "sshpass -p '%s' scp -P %s %s %s@%s:%s";
+        $sshPassCommand = '';
+        if ($this->targetServer->usesPasswordAuth() === true) {
+            $sshPassCommand = "sshpass -p '%s' ";
+            $sshPassCommand = sprintf($sshPassCommand, $this->targetServer->getPassword());
+        }
+        $rawUploadCommand = $sshPassCommand . "scp -P %s %s %s@%s:%s";
         $uploadCommand = sprintf(
             $rawUploadCommand,
-            $this->targetServer->getPassword(),
             $this->targetServer->getPort(),
             $this->sourceBackupPath . '/' . $this->backupFilename,
             $this->targetServer->getUsername(),

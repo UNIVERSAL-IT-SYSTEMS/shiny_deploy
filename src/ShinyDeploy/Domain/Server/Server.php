@@ -99,4 +99,14 @@ abstract class Server extends Domain
         }
         return (int)$this->data['port'];
     }
+
+    /**
+     * Check if sever uses a password for authentication.
+     *
+     * @return bool
+     */
+    public function usesPasswordAuth()
+    {
+        return !empty($this->data['password']);
+    }
 }
