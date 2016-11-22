@@ -179,8 +179,6 @@ class Backup extends Domain
     /**
      * Uploads a backup archive from source to target server.
      *
-     * @todo Abort and show error on "hostname authentication errors"
-     *
      * @return bool
      */
     protected function uploadBackupToTarget()
@@ -193,7 +191,9 @@ class Backup extends Domain
             $sshPassCommand = "sshpass -p '%s' ";
             $sshPassCommand = sprintf($sshPassCommand, $this->targetServer->getPassword());
         }
-        $rawUploadCommand = $sshPassCommand . "scp -P %s %s %s@%s:%s";
+
+        $rawUploadCommand = $sshPassCommand
+            . 'scp -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P %d %s %s@%s:%s || echo "failed."';
         $uploadCommand = sprintf(
             $rawUploadCommand,
             $this->targetServer->getPort(),
@@ -206,8 +206,8 @@ class Backup extends Domain
         if ($uploadResult === false) {
             return false;
         }
-
-        return true;
+        $uploadResult = trim($uploadResult);
+        return empty($uploadResult);
     }
 
     /**
