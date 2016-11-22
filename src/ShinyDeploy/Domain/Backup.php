@@ -99,7 +99,6 @@ class Backup extends Domain
      * Executes a backup by compressing source folder on source server and than uploading this backup file
      * to target server.
      *
-     * @todo Delete backup on source server after upload.
      * @todo Add verification after upload (checksum)
      *
      * @return bool
@@ -124,7 +123,7 @@ class Backup extends Domain
             $this->logResponder->error('Could not compress files on source server. Aborting backup.');
             return false;
         }
-        $this->logResponder->info(sprintf('Files successfully compressed to: %s', $this->backupFilename));
+        $this->logResponder->log(sprintf('Files successfully compressed to: %s', $this->backupFilename));
 
         // Upload backup to target server:
         $this->logResponder->log('Uploading backup to target server...');
@@ -133,7 +132,15 @@ class Backup extends Domain
             $this->logResponder->error('Could not upload backup to target server. Aborting backup.');
             return false;
         }
-        $this->logResponder->info('Backup successfully uploaded to target server.');
+        $this->logResponder->log('Backup successfully uploaded to target server.');
+
+        // Remove backup on source server:
+        $removeResult = $this->removeBackupSource();
+        if ($removeResult !== true) {
+            $this->logResponder->info('Could not remove backup-archive on source server.');
+        }
+        $this->logResponder->log('Backup source successfully deleted.');
+        $this->logResponder->success('Backup completed.');
 
         return true;
     }
@@ -220,5 +227,21 @@ class Backup extends Domain
         $basename = preg_replace('[^a-z0-9-_.]', '', $backupName);
         $filename = $basename . '_' . strftime('%Y-%m-%d_%H%M') . '.tar.gz';
         $this->backupFilename = $filename;
+    }
+
+    /**
+     * Removes backup archive on source server.
+     *
+     * @return bool
+     */
+    protected function removeBackupSource()
+    {
+        if (empty($this->backupFilename)) {
+            throw new RuntimeException('Backup filename not set. Can not remove backup.');
+        }
+        $rawCommand = "rm -f %s";
+        $command = sprintf($rawCommand, $this->sourceBackupPath . '/' . $this->backupFilename);
+        $delResult = $this->sourceServer->executeCommand($command);
+        return ($delResult !== false);
     }
 }
